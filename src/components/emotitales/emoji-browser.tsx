@@ -24,7 +24,7 @@ function EmojiButton({ emoji, onEmojiClick }: { emoji: Emoji, onEmojiClick: (emo
 
 function EmojiGrid({ emojis, onEmojiClick }: { emojis: Emoji[], onEmojiClick: (emoji: string) => void }) {
     return (
-        <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
+        <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 p-1">
             {emojis.map((emoji) => (
                 <EmojiButton key={emoji.emoji} emoji={emoji} onEmojiClick={onEmojiClick} />
             ))}
@@ -57,8 +57,8 @@ export function EmojiBrowser() {
   }, [searchQuery]);
 
   return (
-    <Card className="h-full shadow-lg">
-      <CardHeader>
+    <Card className="shadow-lg flex flex-col h-[calc(100vh-12rem)]">
+      <CardHeader className="flex-shrink-0">
         <CardTitle className="font-headline text-2xl">Emoji Explorer</CardTitle>
         <div className="relative mt-2">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -70,12 +70,13 @@ export function EmojiBrowser() {
           />
         </div>
       </CardHeader>
-      <CardContent>
+      
+      <CardContent className="flex-grow flex flex-col overflow-y-hidden pt-0">
         {filteredEmojis ? (
-            <div className="mt-4">
-                <h3 className="font-headline text-lg mb-2">Search Results for "{searchQuery}"</h3>
+            <div className="mt-4 flex-grow flex flex-col overflow-y-hidden">
+                <h3 className="font-headline text-lg mb-2 flex-shrink-0">Search Results for "{searchQuery}"</h3>
                  {filteredEmojis.length > 0 ? (
-                    <ScrollArea className="h-[500px]">
+                    <ScrollArea className="flex-grow">
                         <EmojiGrid emojis={filteredEmojis} onEmojiClick={handleEmojiClick} />
                     </ScrollArea>
                 ) : (
@@ -83,8 +84,8 @@ export function EmojiBrowser() {
                 )}
             </div>
         ) : (
-            <Tabs defaultValue="joy" className="w-full">
-                <TabsList className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 h-auto">
+            <Tabs defaultValue="joy" className="w-full flex flex-col flex-grow overflow-y-hidden">
+                <TabsList className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 h-auto flex-shrink-0">
                     {Object.entries(emojiCategories).map(([key, { name, icon: Icon }]) => (
                     <TabsTrigger key={key} value={key} className="flex flex-col md:flex-row gap-2 h-auto py-2">
                         <Icon className="h-5 w-5" />
@@ -93,13 +94,15 @@ export function EmojiBrowser() {
                     ))}
                 </TabsList>
 
-                {Object.entries(emojiCategories).map(([key, { emojis }]) => (
-                    <TabsContent key={key} value={key} className="mt-4">
-                        <ScrollArea className="h-[500px]">
-                            <EmojiGrid emojis={emojis} onEmojiClick={handleEmojiClick} />
-                        </ScrollArea>
-                    </TabsContent>
-                ))}
+                <div className="flex-grow mt-4 overflow-y-hidden">
+                  {Object.entries(emojiCategories).map(([key, { emojis }]) => (
+                      <TabsContent key={key} value={key} className="m-0 h-full">
+                          <ScrollArea className="h-full">
+                              <EmojiGrid emojis={emojis} onEmojiClick={handleEmojiClick} />
+                          </ScrollArea>
+                      </TabsContent>
+                  ))}
+                </div>
             </Tabs>
         )}
       </CardContent>
