@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Image as ImageIcon, Loader2, Sparkles } from 'lucide-react';
 import { CelebrationAnimation } from './celebration-animation';
@@ -66,8 +66,11 @@ export function StickerGenerator() {
                 <FormItem>
                   <FormLabel>Sticker Prompt</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="A cute kitten playing with yarn..." {...field} />
+                    <Textarea placeholder="A cute kitten playing with yarn 🧶" {...field} />
                   </FormControl>
+                  <FormDescription>
+                    Try copying an emoji from the explorer to use in your prompt!
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
