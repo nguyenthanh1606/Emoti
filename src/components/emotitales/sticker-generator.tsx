@@ -8,10 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { Image as ImageIcon, Loader2, Sparkles } from 'lucide-react';
+import { Image as ImageIcon, Loader2, Sparkles, Save } from 'lucide-react';
 import { CelebrationAnimation } from './celebration-animation';
 import { generateStickerAction } from '@/actions/stickers';
 import Image from 'next/image';
+import { saveCreation } from '@/lib/storage';
 
 const formSchema = z.object({
   prompt: z.string().min(3, { message: 'Please enter at least 3 characters.' }).max(200, { message: 'Prompt cannot exceed 200 characters.' }),
@@ -21,6 +22,7 @@ export function StickerGenerator() {
   const [generatedSticker, setGeneratedSticker] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -35,6 +37,7 @@ export function StickerGenerator() {
     setError(null);
     setGeneratedSticker(null);
     setShowCelebration(false);
+    setIsSaved(false);
 
     const result = await generateStickerAction(values);
 
@@ -44,6 +47,13 @@ export function StickerGenerator() {
       setTimeout(() => setShowCelebration(false), 2000);
     } else {
       setError(result.error);
+    }
+  };
+
+  const handleSave = () => {
+    if (generatedSticker) {
+      saveCreation('sticker', generatedSticker);
+      setIsSaved(true);
     }
   };
 
@@ -96,9 +106,9 @@ export function StickerGenerator() {
       
       {(isSubmitting || generatedSticker || error) && (
         <div className="p-6 pt-0">
-          <Card className="bg-background/80 relative aspect-square">
+          <Card className="bg-background/80 relative">
             {showCelebration && <CelebrationAnimation />}
-            <CardContent className="h-full flex items-center justify-center p-2">
+            <CardContent className="min-h-[300px] flex items-center justify-center p-2">
               {isSubmitting && <Loader2 className="h-8 w-8 animate-spin text-primary" />}
               {error && <p className="text-destructive text-center">{error}</p>}
               {generatedSticker && (
@@ -107,10 +117,23 @@ export function StickerGenerator() {
                   alt="Generated Sticker" 
                   width={400} 
                   height={400} 
-                  className="rounded-lg object-contain"
+                  className="rounded-lg object-contain max-h-[350px]"
                 />
               )}
             </CardContent>
+            {generatedSticker && (
+              <CardFooter className="p-2 border-t justify-end">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={isSaved}
+                  onClick={handleSave}
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  {isSaved ? 'Saved!' : 'Save Sticker'}
+                </Button>
+              </CardFooter>
+            )}
           </Card>
         </div>
       )}

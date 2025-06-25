@@ -3,6 +3,7 @@ import { EmojiBrowser } from '@/components/emotitales/emoji-browser';
 import { StickerGenerator } from '@/components/emotitales/sticker-generator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Wand2, Sparkles } from 'lucide-react';
+import { SavedCreations } from '@/components/emotitales/saved-creations';
 
 export default function Home() {
   return (
@@ -36,8 +37,9 @@ export default function Home() {
               </TabsContent>
             </Tabs>
           </div>
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-8">
             <EmojiBrowser />
+            <SavedCreations />
           </div>
         </div>
       </main>

@@ -8,9 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { Wand2, Loader2 } from 'lucide-react';
+import { Wand2, Loader2, Save } from 'lucide-react';
 import { CelebrationAnimation } from './celebration-animation';
 import { generateEmojiStoryAction } from '@/actions/emotitales';
+import { saveCreation } from '@/lib/storage';
 
 const formSchema = z.object({
   keywords: z.string().min(3, { message: 'Please enter at least 3 characters of keywords.' }).max(100, { message: 'Keywords cannot exceed 100 characters.' }),
@@ -20,6 +21,7 @@ export function EmojiGenerator() {
   const [generatedStory, setGeneratedStory] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -34,6 +36,7 @@ export function EmojiGenerator() {
     setError(null);
     setGeneratedStory(null);
     setShowCelebration(false);
+    setIsSaved(false);
 
     const result = await generateEmojiStoryAction(values);
 
@@ -43,6 +46,13 @@ export function EmojiGenerator() {
       setTimeout(() => setShowCelebration(false), 2000);
     } else {
       setError(result.error);
+    }
+  };
+
+  const handleSave = () => {
+    if (generatedStory) {
+      saveCreation('emoji', generatedStory);
+      setIsSaved(true);
     }
   };
 
@@ -102,6 +112,19 @@ export function EmojiGenerator() {
               {error && <p className="text-destructive text-center">{error}</p>}
               {generatedStory && <p className="text-4xl md:text-5xl text-center break-words">{generatedStory}</p>}
             </CardContent>
+            {generatedStory && (
+              <CardFooter className="justify-end">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={isSaved}
+                  onClick={handleSave}
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  {isSaved ? 'Saved!' : 'Save Tale'}
+                </Button>
+              </CardFooter>
+            )}
           </Card>
         </div>
       )}
