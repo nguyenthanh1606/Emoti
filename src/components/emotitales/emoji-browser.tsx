@@ -5,8 +5,32 @@ import { Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { emojiCategories, allEmojis } from '@/lib/emoji-data';
+import { emojiCategories, allEmojis, type Emoji } from '@/lib/emoji-data';
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from '@/components/ui/scroll-area';
+
+function EmojiButton({ emoji, onEmojiClick }: { emoji: Emoji, onEmojiClick: (emoji: string) => void }) {
+    return (
+        <button
+            onClick={() => onEmojiClick(emoji.emoji)}
+            className="text-4xl p-2 rounded-lg hover:bg-accent/20 transition-all duration-200 ease-in-out hover:scale-125 focus:outline-none focus:ring-2 focus:ring-accent"
+            aria-label={`Copy emoji ${emoji.description}`}
+            title={emoji.description}
+        >
+            {emoji.emoji}
+        </button>
+    )
+}
+
+function EmojiGrid({ emojis, onEmojiClick }: { emojis: Emoji[], onEmojiClick: (emoji: string) => void }) {
+    return (
+        <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
+            {emojis.map((emoji) => (
+                <EmojiButton key={emoji.emoji} emoji={emoji} onEmojiClick={onEmojiClick} />
+            ))}
+        </div>
+    )
+}
 
 export function EmojiBrowser() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,8 +47,13 @@ export function EmojiBrowser() {
   };
 
   const filteredEmojis = useMemo(() => {
-    if (!searchQuery) return [];
-    return allEmojis.filter(emoji => emoji.includes(searchQuery));
+    if (!searchQuery) return null;
+    const lowerCaseQuery = searchQuery.toLowerCase().trim();
+    if (!lowerCaseQuery) return null;
+    return allEmojis.filter(emoji => 
+      emoji.description.toLowerCase().includes(lowerCaseQuery) ||
+      emoji.emoji.includes(lowerCaseQuery)
+    );
   }, [searchQuery]);
 
   return (
@@ -42,54 +71,37 @@ export function EmojiBrowser() {
         </div>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="joy" className="w-full">
-          <TabsList className="flex flex-wrap w-full h-auto justify-center">
-            {Object.entries(emojiCategories).map(([key, { name, icon: Icon }]) => (
-              <TabsTrigger key={key} value={key} className="flex flex-col md:flex-row gap-2 h-auto py-2">
-                <Icon className="h-5 w-5" />
-                <span>{name}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          {searchQuery ? (
+        {filteredEmojis ? (
             <div className="mt-4">
-                <h3 className="font-headline text-lg mb-2">Search Results</h3>
-                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
-                    {filteredEmojis.map((emoji) => (
-                        <button
-                            key={emoji}
-                            onClick={() => handleEmojiClick(emoji)}
-                            className="text-4xl p-2 rounded-lg hover:bg-accent/20 transition-all duration-200 ease-in-out hover:scale-125 focus:outline-none focus:ring-2 focus:ring-accent"
-                            aria-label={`Copy emoji ${emoji}`}
-                        >
-                            {emoji}
-                        </button>
-                    ))}
-                </div>
-                {filteredEmojis.length === 0 && <p className="text-muted-foreground">No emojis found.</p>}
+                <h3 className="font-headline text-lg mb-2">Search Results for "{searchQuery}"</h3>
+                 {filteredEmojis.length > 0 ? (
+                    <ScrollArea className="h-[500px]">
+                        <EmojiGrid emojis={filteredEmojis} onEmojiClick={handleEmojiClick} />
+                    </ScrollArea>
+                ) : (
+                    <p className="text-muted-foreground">No emojis found.</p>
+                )}
             </div>
-          ) : (
-            <>
-              {Object.entries(emojiCategories).map(([key, { emojis }]) => (
-                <TabsContent key={key} value={key} className="mt-4">
-                  <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
-                    {emojis.map((emoji) => (
-                      <button
-                        key={emoji}
-                        onClick={() => handleEmojiClick(emoji)}
-                        className="text-4xl p-2 rounded-lg hover:bg-accent/20 transition-all duration-200 ease-in-out hover:scale-125 focus:outline-none focus:ring-2 focus:ring-accent"
-                        aria-label={`Copy emoji ${emoji}`}
-                      >
-                        {emoji}
-                      </button>
+        ) : (
+            <Tabs defaultValue="joy" className="w-full">
+                <TabsList className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 h-auto">
+                    {Object.entries(emojiCategories).map(([key, { name, icon: Icon }]) => (
+                    <TabsTrigger key={key} value={key} className="flex flex-col md:flex-row gap-2 h-auto py-2">
+                        <Icon className="h-5 w-5" />
+                        <span>{name}</span>
+                    </TabsTrigger>
                     ))}
-                  </div>
-                </TabsContent>
-              ))}
-            </>
-          )}
-        </Tabs>
+                </TabsList>
+
+                {Object.entries(emojiCategories).map(([key, { emojis }]) => (
+                    <TabsContent key={key} value={key} className="mt-4">
+                        <ScrollArea className="h-[500px]">
+                            <EmojiGrid emojis={emojis} onEmojiClick={handleEmojiClick} />
+                        </ScrollArea>
+                    </TabsContent>
+                ))}
+            </Tabs>
+        )}
       </CardContent>
     </Card>
   );
