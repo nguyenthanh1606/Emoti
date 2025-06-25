@@ -43,7 +43,7 @@ export function EmojiBrowser() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="joy" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 h-auto flex-wrap">
+          <TabsList className="flex flex-wrap w-full h-auto justify-center">
             {Object.entries(emojiCategories).map(([key, { name, icon: Icon }]) => (
               <TabsTrigger key={key} value={key} className="flex flex-col md:flex-row gap-2 h-auto py-2">
                 <Icon className="h-5 w-5" />
